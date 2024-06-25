@@ -22,7 +22,7 @@ export class MapService {
     this.map?.flyTo({
       zoom: 14,
       center: coords
-    })
+    });
   }
 
 }
