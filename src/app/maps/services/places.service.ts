@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Feature, PlacesResponse } from '../interfaces/places';
+import { PlacesApiClient } from '../api';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class PlacesService {
   get isUserLocationReady(): boolean {
     return !!this.userLocation;
   }
-  constructor(private http: HttpClient) { 
+  constructor(private placesApi: PlacesApiClient) { 
     this.getUserLocation();
   }
 
@@ -38,8 +39,14 @@ export class PlacesService {
     }
 
     getPlacesByQuery(query: String = ''){
+      if(!this.userLocation) throw Error("There is not user location")
+
       this.isLoadingPlaces = true;
-      this.http.get<PlacesResponse>(`https://api.mapbox.com/search/geocode/v6/forward?q=${ query }&limit=5&proximity=-74.05115860035947,40.744414190268714&language=es&access_token=pk.eyJ1IjoiamV5c29ubW8iLCJhIjoiY2x4dGQ2MTdvMDBnMzJpcTNxZnV0cWRuZyJ9.RuA853JDu0IcpaPYHsK6pw`)
+      this.placesApi.get<PlacesResponse>(`${ query }`, {
+        params: { 
+          proximity: this.userLocation.join(',')
+        }
+      })
       .subscribe( resp =>{
         console.log(resp.features);
         this.isLoadingPlaces = false;
