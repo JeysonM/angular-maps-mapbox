@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { SearchResultsComponent } from '../search-results/search-results.component';
+import { PlacesService } from '../../services';
 
 @Component({
   selector: 'app-search-bar',
@@ -11,12 +12,22 @@ import { SearchResultsComponent } from '../search-results/search-results.compone
 export class SearchBarComponent {
 
   private debounceTimer?: NodeJS.Timeout;
-  constructor(){  }
+  specialKeys: Set<string> = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    'Shift', 'Control', 'Alt', 'Meta', 'Escape', 'Tab'
+  ]);
 
-  onQueryChanged( query: string = ''){
+  constructor(private placesService: PlacesService){  }
+
+  onQueryChanged( event: KeyboardEvent, query: string = ''){
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    if (this.specialKeys.has(event.key)) {
+      return; //console.log(`Ignoring special key: ${event.key}`);
+      
+    }
+
     this.debounceTimer = setTimeout(() =>{
-        console.log('query manda', query)
+        this.placesService.getPlacesByQuery( query );
     }, 350);
   }
 }
